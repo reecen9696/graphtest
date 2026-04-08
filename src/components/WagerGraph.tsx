@@ -184,7 +184,7 @@ export function WagerGraph({ bets }: Props) {
           </div>
           <div
             style={{
-              color: tooltip.net >= 0 ? '#03BD6C' : '#ef4444',
+              color: tooltip.net >= 0 ? '#03BD6C' : '#D92D20',
               fontWeight: 600,
             }}
           >

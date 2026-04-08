@@ -29,9 +29,48 @@ index 414c4e6..7cf169e 100644
  interface DegenOptions {
      /** Multiplier for particle count and size (default 1) */
 diff --git a/node_modules/liveline/dist/index.js b/node_modules/liveline/dist/index.js
-index fd05062..be645ff 100644
+index fd05062..e963363 100644
 --- a/node_modules/liveline/dist/index.js
 +++ b/node_modules/liveline/dist/index.js
+@@ -30,11 +30,11 @@ function resolveTheme(color, mode) {
+     gridLine: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)",
+     gridLabel: isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.35)",
+     // Dot — always semantic
+-    dotUp: "#22c55e",
+-    dotDown: "#ef4444",
++    dotUp: "#03BD6C",
++    dotDown: "#D92D20",
+     dotFlat: color,
+-    glowUp: "rgba(34, 197, 94, 0.18)",
+-    glowDown: "rgba(239, 68, 68, 0.18)",
++    glowUp: "rgba(3, 189, 108, 0.18)",
++    glowDown: "rgba(217, 45, 32, 0.18)",
+     glowFlat: rgba(r, g, b, 0.12),
+     // Badge
+     badgeOuterBg: isDark ? "rgba(40, 40, 40, 0.95)" : "rgba(255, 255, 255, 0.95)",
+@@ -64,9 +64,9 @@ function resolveTheme(color, mode) {
+ var SERIES_COLORS = [
+   "#3b82f6",
+   // blue
+-  "#ef4444",
++  "#D92D20",
+   // red
+-  "#22c55e",
++  "#03BD6C",
+   // green
+   "#f59e0b",
+   // amber
+@@ -882,8 +882,8 @@ function drawTimeAxis(ctx, layout, palette, windowSecs, targetWindowSecs, format
+ }
+ 
+ // src/draw/orderbook.ts
+-var GREEN = [34, 197, 94];
+-var RED = [239, 68, 68];
++var GREEN = [3, 189, 108];
++var RED = [217, 45, 32];
+ function createOrderbookState() {
+   return {
+     labels: [],
 @@ -894,9 +894,17 @@ function createOrderbookState() {
      churnRate: 0
    };
@@ -107,3 +146,38 @@ index fd05062..be645ff 100644
    }
    ctx.restore();
  }
+@@ -1089,10 +1108,10 @@ function drawParticles(ctx, state, dt) {
+ }
+ 
+ // src/draw/candlestick.ts
+-var BULL = "#22c55e";
+-var BEAR = "#ef4444";
+-var BULL_RGB = [34, 197, 94];
+-var BEAR_RGB = [239, 68, 68];
++var BULL = "#03BD6C";
++var BEAR = "#D92D20";
++var BULL_RGB = [3, 189, 108];
++var BEAR_RGB = [217, 45, 32];
+ function blendColor2(t) {
+   const r = Math.round(BEAR_RGB[0] + (BULL_RGB[0] - BEAR_RGB[0]) * t);
+   const g = Math.round(BEAR_RGB[1] + (BULL_RGB[1] - BEAR_RGB[1]) * t);
+@@ -1961,8 +1980,8 @@ var WINDOW_BUFFER = 0.05;
+ var WINDOW_BUFFER_NO_BADGE = 0.015;
+ var VALUE_SNAP_THRESHOLD = 1e-3;
+ var ADAPTIVE_SPEED_BOOST = 0.2;
+-var MOMENTUM_GREEN = [34, 197, 94];
+-var MOMENTUM_RED = [239, 68, 68];
++var MOMENTUM_GREEN = [3, 189, 108];
++var MOMENTUM_RED = [217, 45, 32];
+ var CHART_REVEAL_SPEED = 0.14;
+ var CHART_REVEAL_SPEED_FWD = 0.09;
+ var PAUSE_PROGRESS_SPEED = 0.12;
+@@ -3463,7 +3482,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         const displayVal = cfg.valueMomentumColor ? Math.abs(smoothValue) : smoothValue;
+         valEl.textContent = cfg.formatValue(displayVal);
+         if (cfg.valueMomentumColor) {
+-          const mc = momentum === "up" ? "#22c55e" : momentum === "down" ? "#ef4444" : "";
++          const mc = momentum === "up" ? "#03BD6C" : momentum === "down" ? "#D92D20" : "";
+           if (mc) valEl.style.color = mc;
+           else valEl.style.removeProperty("color");
+         }
