@@ -29,10 +29,30 @@ index 414c4e6..7cf169e 100644
  interface DegenOptions {
      /** Multiplier for particle count and size (default 1) */
 diff --git a/node_modules/liveline/dist/index.js b/node_modules/liveline/dist/index.js
-index fd05062..5b8b150 100644
+index fd05062..be645ff 100644
 --- a/node_modules/liveline/dist/index.js
 +++ b/node_modules/liveline/dist/index.js
-@@ -954,8 +954,8 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+@@ -894,9 +894,17 @@ function createOrderbookState() {
+     churnRate: 0
+   };
+ }
+-var MAX_LABELS = 50;
++var MAX_LABELS = 6;
+ var LABEL_LIFETIME = 6;
+-var SPAWN_INTERVAL = 40;
++var SPAWN_INTERVAL = 800;
++var _iconImgCache = new Map();
++function _getIconImg(src) {
++  if (_iconImgCache.has(src)) return _iconImgCache.get(src);
++  var img = new Image(16, 16);
++  img.src = src;
++  _iconImgCache.set(src, img);
++  return img;
++}
+ var MIN_LABEL_GAP = 22;
+ var BASE_SPEED = 60;
+ var MAX_SPEED = 160;
+@@ -954,8 +962,8 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
      }
      if (tooClose) break;
      const allLevels = [];
@@ -43,16 +63,17 @@ index fd05062..5b8b150 100644
      let totalWeight = 0;
      for (const l of allLevels) totalWeight += l.size;
      let r = Math.random() * totalWeight;
-@@ -970,7 +970,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+@@ -970,7 +978,8 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
      const sizeRatio = picked.size / maxSize;
      state.labels.push({
        y: bottomY,
 -      text: `+ ${formatSize(picked.size)}`,
-+      text: `${picked.icon != null ? picked.icon + " " : ""}${formatSize(picked.size)}`,
++      text: (picked.icon != null && !picked.icon.startsWith('data:') ? picked.icon + ' ' : '') + formatSize(picked.size),
++      iconSrc: picked.icon != null && picked.icon.startsWith('data:') ? picked.icon : null,
        green: picked.green,
        life: LABEL_LIFETIME,
        maxLife: LABEL_LIFETIME,
-@@ -995,7 +995,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+@@ -995,7 +1004,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
    ctx.textAlign = "left";
    ctx.textBaseline = "middle";
    ctx.globalAlpha = baseAlpha;
@@ -61,3 +82,28 @@ index fd05062..5b8b150 100644
    for (let i = 0; i < state.labels.length; i++) {
      const l = state.labels[i];
      const lifeRatio = l.life / l.maxLife;
+@@ -1005,12 +1014,22 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+     const colorStrength = l.intensity * fadeIn * fadeOut;
+     const baseColor = l.green ? GREEN : RED;
+     const fillColor = mixColor(baseColor, bg, 1 - colorStrength);
++    let textX = labelX;
++    if (l.iconSrc) {
++      const img = _getIconImg(l.iconSrc);
++      if (img.complete && img.naturalWidth > 0) {
++        ctx.globalAlpha = baseAlpha * colorStrength;
++        ctx.drawImage(img, textX, l.y - 8, 16, 16);
++        ctx.globalAlpha = baseAlpha;
++        textX += 20;
++      }
++    }
+     ctx.strokeStyle = outlineColor;
+     ctx.lineWidth = 4;
+     ctx.lineJoin = "round";
+-    ctx.strokeText(l.text, labelX, l.y);
++    ctx.strokeText(l.text, textX, l.y);
+     ctx.fillStyle = fillColor;
+-    ctx.fillText(l.text, labelX, l.y);
++    ctx.fillText(l.text, textX, l.y);
+   }
+   ctx.restore();
+ }

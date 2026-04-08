@@ -10,7 +10,7 @@ function randInt(min: number, max: number) {
   return Math.floor(rand(min, max + 1))
 }
 
-function makeBet(cumulative: number): Bet {
+function makeBetAt(time: number, cumulative: number): Bet {
   const game: Game = GAMES[randInt(0, GAMES.length - 1)]
   const config = GAME_CONFIG[game]
   const wager = Math.round(rand(5, 100) * 100) / 100
@@ -20,12 +20,33 @@ function makeBet(cumulative: number): Bet {
   const net = payout - wager
 
   return {
-    time: Date.now() / 1000,
+    time,
     game,
     wager,
     payout,
     cumulative: Math.round((cumulative + net) * 100) / 100,
   }
+}
+
+function makeBet(cumulative: number): Bet {
+  return makeBetAt(Date.now() / 1000, cumulative)
+}
+
+// Pre-generate ~35 bets spread over the last 115 seconds so the graph
+// is populated immediately on mount.
+function makeHistory(): { bets: Bet[]; finalCumulative: number } {
+  const count = 35
+  const now = Date.now() / 1000
+  const bets: Bet[] = []
+  let cumulative = 0
+  for (let i = 0; i < count; i++) {
+    // Slightly uneven spacing to look natural
+    const t = now - 114 + (i / count) * 112 + rand(-0.4, 0.4)
+    const bet = makeBetAt(t, cumulative)
+    cumulative = bet.cumulative
+    bets.push(bet)
+  }
+  return { bets, finalCumulative: cumulative }
 }
 
 // Each tick picks randomly from a weighted set of behaviours so the
@@ -68,8 +89,14 @@ function* scheduleGen(): Generator<number> {
 }
 
 export function useMockBets() {
-  const [bets, setBets] = useState<Bet[]>([])
-  const cumulativeRef = useRef(0)
+  // Stable ref holding the pre-generated history — created once synchronously.
+  const historyRef = useRef<{ bets: Bet[]; finalCumulative: number } | null>(null)
+  if (historyRef.current === null) {
+    historyRef.current = makeHistory()
+  }
+
+  const [bets, setBets] = useState<Bet[]>(historyRef.current.bets)
+  const cumulativeRef = useRef(historyRef.current.finalCumulative)
   const scheduleRef = useRef(scheduleGen())
 
   const addBet = useCallback(() => {
