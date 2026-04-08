@@ -1,0 +1,13 @@
+diff --git a/node_modules/liveline/dist/index.js b/node_modules/liveline/dist/index.js
+index fd05062..607474c 100644
+--- a/node_modules/liveline/dist/index.js
++++ b/node_modules/liveline/dist/index.js
+@@ -995,7 +995,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+   ctx.textAlign = "left";
+   ctx.textBaseline = "middle";
+   ctx.globalAlpha = baseAlpha;
+-  const outlineColor = `rgb(${bg[0]},${bg[1]},${bg[2]})`;
++  const outlineColor = `rgba(0,0,0,0)`;
+   for (let i = 0; i < state.labels.length; i++) {
+     const l = state.labels[i];
+     const lifeRatio = l.life / l.maxLife;
