@@ -1,7 +1,57 @@
+diff --git a/node_modules/liveline/dist/index.d.cts b/node_modules/liveline/dist/index.d.cts
+index 414c4e6..7cf169e 100644
+--- a/node_modules/liveline/dist/index.d.cts
++++ b/node_modules/liveline/dist/index.d.cts
+@@ -30,8 +30,8 @@ interface WindowOption {
+     secs: number;
+ }
+ interface OrderbookData {
+-    bids: [number, number][];
+-    asks: [number, number][];
++    bids: [number, number, string?][];
++    asks: [number, number, string?][];
+ }
+ interface DegenOptions {
+     /** Multiplier for particle count and size (default 1) */
+diff --git a/node_modules/liveline/dist/index.d.ts b/node_modules/liveline/dist/index.d.ts
+index 414c4e6..7cf169e 100644
+--- a/node_modules/liveline/dist/index.d.ts
++++ b/node_modules/liveline/dist/index.d.ts
+@@ -30,8 +30,8 @@ interface WindowOption {
+     secs: number;
+ }
+ interface OrderbookData {
+-    bids: [number, number][];
+-    asks: [number, number][];
++    bids: [number, number, string?][];
++    asks: [number, number, string?][];
+ }
+ interface DegenOptions {
+     /** Multiplier for particle count and size (default 1) */
 diff --git a/node_modules/liveline/dist/index.js b/node_modules/liveline/dist/index.js
-index fd05062..607474c 100644
+index fd05062..5b8b150 100644
 --- a/node_modules/liveline/dist/index.js
 +++ b/node_modules/liveline/dist/index.js
+@@ -954,8 +954,8 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+     }
+     if (tooClose) break;
+     const allLevels = [];
+-    for (const [, size] of orderbook.bids) allLevels.push({ size, green: true });
+-    for (const [, size] of orderbook.asks) allLevels.push({ size, green: false });
++    for (const [, size, icon] of orderbook.bids) allLevels.push({ size, green: true, icon });
++    for (const [, size, icon] of orderbook.asks) allLevels.push({ size, green: false, icon });
+     let totalWeight = 0;
+     for (const l of allLevels) totalWeight += l.size;
+     let r = Math.random() * totalWeight;
+@@ -970,7 +970,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
+     const sizeRatio = picked.size / maxSize;
+     state.labels.push({
+       y: bottomY,
+-      text: `+ ${formatSize(picked.size)}`,
++      text: `${picked.icon != null ? picked.icon + " " : ""}${formatSize(picked.size)}`,
+       green: picked.green,
+       life: LABEL_LIFETIME,
+       maxLife: LABEL_LIFETIME,
 @@ -995,7 +995,7 @@ function drawOrderbook(ctx, layout, palette, orderbook, dt, state, swingMagnitud
    ctx.textAlign = "left";
    ctx.textBaseline = "middle";

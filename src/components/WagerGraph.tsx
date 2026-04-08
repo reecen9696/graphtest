@@ -38,16 +38,22 @@ export function WagerGraph({ bets }: Props) {
   )
   const value = bets.length > 0 ? bets[bets.length - 1].cumulative : 0
 
-  // Map recent bets to orderbook: wins = bids (green), losses = asks (red)
-  // price = cumulative P&L at that point, size = wager (larger = brighter label)
+  // Map visible bets (within the 120s graph window) to orderbook:
+  // wins = bids (green), losses = asks (red)
+  // icon prefix matches the game shown on hover
+  const GAME_SYMBOLS: Record<Game, string> = {
+    blackjack: '♠',
+    roulette: '◎',
+  }
   const orderbook = useMemo(() => {
-    const recent = bets.slice(-40)
-    const bids: [number, number][] = recent
+    const windowStart = Date.now() / 1000 - 120
+    const visible = bets.filter(b => b.time >= windowStart)
+    const bids: [number, number, string][] = visible
       .filter(b => b.payout > b.wager)
-      .map(b => [b.cumulative, b.wager])
-    const asks: [number, number][] = recent
+      .map(b => [b.cumulative, b.wager, GAME_SYMBOLS[b.game]])
+    const asks: [number, number, string][] = visible
       .filter(b => b.payout <= b.wager)
-      .map(b => [b.cumulative, b.wager])
+      .map(b => [b.cumulative, b.wager, GAME_SYMBOLS[b.game]])
     return { bids, asks }
   }, [bets])
 
@@ -115,6 +121,31 @@ export function WagerGraph({ bets }: Props) {
           }
         />
       </div>
+
+      {bets.length < 2 && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(26, 26, 26, 0.75)',
+            borderRadius: 8,
+            zIndex: 20,
+          }}
+        >
+          <div style={{
+            width: 40,
+            height: 40,
+            border: '3px solid rgba(255,255,255,0.1)',
+            borderTopColor: '#03BD6C',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+        </div>
+      )}
 
       {tooltip && (
         <div
